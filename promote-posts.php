@@ -33,6 +33,39 @@ function promote_posts_view() {?>
       echo __('Promote Posts', 'menu-gfb-promote-posts');
     ?>
   </h1>
+  
 <?php
+}
+add_action('wp_enqueue_scripts', 'promote_posts_enqueue_scripts');
+function promote_posts_enqueue_scripts() {
+  wp_enqueue_script('suggest');
+}
+
+add_action('wp_head', 'promote_posts_wp_head');
+function promote_posts_wp_head() { ?>
+  <script type="text/javascript">
+    var se_ajax_url = '<?php echo admin_url('admin-ajax.php'); ?>';
+
+    jQuery(document).ready(function() {
+      jQuery('#se_search_element_id').suggest(se_ajax_url + '?action=post_lookup');
+    });
+  </script>
+<?php
+}
+
+add_action('wp_ajax_post_lookup', 'post_lookup');
+// add_action('wp_ajax_nopriv_post_lookup', 'post_lookup');
+
+function post_lookup() {
+  global $wpdb;
+
+  $search = like_escape($_REQUEST['q']);
+
+  $query = 'SELECT ID,post_title FROM ' . $wpdb->posts . '
+      WHERE post_title LIKE \'' . $search . '%\'
+      AND post_status = \'publish\'
+      ORDER BY post_title ASC';
+
+  die();
 }
 ?>
